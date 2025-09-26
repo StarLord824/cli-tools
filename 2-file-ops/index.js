@@ -4,6 +4,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import {program} from 'commander';
+
 const info = async()=>{
     const fileName = process.argv[2];
 
@@ -79,10 +81,46 @@ const renamer = async()=>{
     });
 }
 
-await info();
-await wc();
-await renamer();
+const superRenamer = async()=>{
+    program.
+        name('super-renamer').
+        description('Renames files and directories').
+        version('1.0.0', '--version').
+        argument('<old>', 'The old name').
+        argument('<new>', 'The new name').
+        option('-f, --force', 'Force overwrite', false).
+        option('-v --verbose', 'Print additional information', false)
 
+    program.parse()
+    const options = program.opts()
+    const [src, dest] = program.args
+
+    if(options.verbose){
+        console.log(`Old name: ${src}`)
+        console.log(`New name: ${dest}`)
+        console.log(`Force Flag: ${options.force}`)
+    }
+
+    if(!fs.existsSync(src)){
+        console.error(`Source file ${src} doesn't exists`);
+        return;
+    }
+    if(fs.existsSync(dest) && !options.force){
+        console.error(`Destination file ${dest} already exists, use -f to overwrite`);
+        return;
+    }
+
+    try {
+        fs.renameSync(src, dest);
+        console.log(`Renamed ${src} to ${dest}`);
+    } catch(err) {
+        console.error(err);
+    }
+}
+// await info();
+// await wc();
+// await renamer();
+await superRenamer();
 const main = async()=>{
     //takes a file name and gets user selection of action
 }
